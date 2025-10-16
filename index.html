@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Grammar Guardian ✍️</title>
+<style>
+  :root{--bg1:#f0f7ff;--card:#fff;--accent:#2b6cb0;--ok:#16a34a;--bad:#dc2626}
+  html,body{height:100%;margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,var(--bg1),#e6f0ff);display:flex;align-items:center;justify-content:center;padding:12px}
+  .wrap{width:100%;max-width:720px;background:var(--card);border-radius:14px;box-shadow:0 10px 30px rgba(20,30,60,.12);padding:18px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+  header h1{margin:0;font-size:1.2rem;color:var(--accent)}
+  .meta{margin-left:auto;text-align:right;font-size:.9rem}
+  .score{font-weight:700;color:#0b6;display:block}
+  .card{padding:14px;border-radius:10px;border:1px solid #eef5ff;background:linear-gradient(180deg,#fff,#fbfdff);margin-bottom:12px}
+  .sentence{font-size:1.1rem;padding:10px;border-radius:8px;background:#f7fbff;border:1px dashed #dfeeff;min-height:48px;display:flex;align-items:center}
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .opt{padding:10px;border-radius:8px;border:1px solid #e6eefc;background:white;cursor:pointer;user-select:none}
+  .opt.selected{outline:3px solid rgba(43,108,176,.12)}
+  .opt.correct{border-color:var(--ok);background:rgba(16,185,129,.06)}
+  .opt.wrong{border-color:var(--bad);background:rgba(220,38,38,.04)}
+  .controls{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer}
+  .btn-ghost{background:#fff;border:1px solid #dbeefe;color:var(--accent)}
+  .timer{font-weight:700;padding:6px 10px;border-radius:8px;background:#f1f7ff;border:1px solid #dbeefe}
+  .progress{height:8px;background:#eef6ff;border-radius:8px;margin-top:8px;overflow:hidden}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,#2b6cb0,#4f9ae6);width:0%}
+  .feedback{margin-top:8px;font-weight:700;min-height:22px}
+  .hall{margin-top:10px;padding:10px;border-radius:8px;background:#fff7ef;border:1px solid #ffe8cc}
+  .hof-list{margin-top:8px}
+  .hof-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #fff2e6}
+  .certificate-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 24px;
+    width: 100%;
+  }
+  .certificate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 800px;
+    min-width: 280px;
+    border: 12px solid var(--accent);
+    border-radius: 24px;
+    padding: 32px 16px;
+    background: var(--card);
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.10);
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    position: relative;
+  }
+  .certificate-title {
+    font-size: 2.3em;
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-family: 'Georgia', serif;
+    letter-spacing: 2px;
+  }
+  .certificate-content {
+    font-size: 1.15em;
+    color: #333;
+    margin: 18px 0;
+    line-height: 1.6;
+    width: 100%;
+    max-width: 600px;
+  }
+  .certificate-footer {
+    font-size: 0.98em;
+    color: #555;
+    margin-top: 16px;
+    font-family: 'Arial', sans-serif;
+  }
+  .signature {
+    font-family: 'Brush Script MT', cursive;
+    font-size: 1.7em;
+    color: #16a34a;
+    margin-top: 26px;
+    font-weight: bold;
+    letter-spacing: 1.2px;
+    text-align: center;
+  }
+  .certificate-decoration {
+    position: absolute;
+    left: 20px; right: 20px; top: 20px; bottom: 20px;
+    border: 4px dashed #4f9ae6;
+    border-radius: 16px;
+    pointer-events: none;
+  }
+  @media(max-width:650px){
+    .certificate {
+      padding: 20px 6px;
+      font-size: 88%;
+      border-width: 8px;
+    }
+    .certificate-title { font-size:1.4em;}
+    .certificate-content{font-size:1em;}
+    .certificate-footer{font-size:0.9em;}
+    .signature{font-size:1.2em;}
+  }
+  .hidden { display:none; }
+  @media(max-width:520px){
+    .options{grid-template-columns:1fr}
+    header{gap:8px}
+    .meta{text-align:left;margin-left:0}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap" role="application" aria-label="Grammar Guardian">
+    <header>
+      <div>
+        <h1>Grammar Guardian ✍️</h1>
+        <div style="font-size:.88rem;color:#556">Fix sentences — learn grammar in minutes</div>
+      </div>
+      <div class="meta" aria-live="polite">
+        <div>Score: <span id="currentScore" class="score">0</span></div>
+        <div>Best: <span id="bestScore">0</span></div>
+      </div>
+    </header>
+
+    <div class="card" id="questionCard" aria-live="polite">
+      <div class="sentence" id="sentence">Loading question...</div>
+      <div class="options" id="options"></div>
+      <div class="controls">
+        <div class="timer" id="timer">Time: 20s</div>
+        <button id="submitBtn">Submit Answer</button>
+        <button id="skipBtn" class="btn-ghost">Skip</button>
+        <div style="margin-left:auto;font-size:.9rem;color:#667">Q <span id="qIndex">0</span>/<span id="qTotal">0</span></div>
+      </div>
+      <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+      <button id="startBtn">Start Game</button>
+      <button id="resetBtn" class="btn-ghost">Reset Scores</button>
+      <button id="showHofBtn" class="btn-ghost">Show Hall of Fame</button>
+    </div>
+
+    <div class="hall hidden" id="hall" aria-live="polite">
+      <strong>🏆 Hall of Fame (Top 10)</strong>
+      <div class="hof-list" id="hofList"></div>
+      <div style="margin-top:10px">
+        <div style="font-size:.95rem">If you make the top score, enter your name:</div>
+        <input id="hofName" placeholder="Your name" style="padding:8px;border-radius:6px;border:1px solid #e1eefc;width:60%;margin-top:8px" maxlength="30"/>
+        <button id="saveHofBtn" style="margin-left:8px">Save</button>
+      </div>
+    </div>
+
+    <!-- Certificate Section Centered & Elegant -->
+    <div class="certificate-container hidden" id="certificateContainer">
+      <div class="certificate" id="certificateCard">
+        <div class="certificate-decoration"></div>
+        <div class="certificate-title">Certificate of Achievement</div>
+        <div class="certificate-content" id="certContent">
+          This certificate is proudly presented to <strong id="certName">[Recipient Name]</strong> <br>
+          in recognition of your outstanding achievements and dedication.<br><br>
+          We honor your commitment, perseverance, and excellence.<br>
+          <span id="certScore"></span>
+        </div>
+        <div class="certificate-footer" id="certDate">
+          Given this day, <span id="certGivenDate"></span>
+        </div>
+        <div class="signature">Signed: AGMHSS Patteeswaram</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ======= Question bank ======= */
+const questions = [
+  { sentence: "She ____ to the store every Saturday.", options:["go","goes","gone","going"], answer:1, explanation:"Third person singular (she) requires 'goes'." },
+  { sentence: "They has finished their homework.", options:["have","has","had","having"], answer:0, explanation:"Subject 'they' takes 'have' not 'has'." },
+  { sentence: "He don't like vegetables.", options:["doesn't","don't","didn't","not"], answer:0, explanation:"Third person singular (he) + negative → 'doesn't'." },
+  { sentence: "I have went to the market.", options:["went","gone","go","been"], answer:1, explanation:"Present perfect requires past participle 'gone'." },
+  { sentence: "There is many books on the table.", options:["are","is","was","were"], answer:0, explanation:"Plural 'books' needs 'are'." },
+  // ... (add all your original questions here) ...
+];
+
+/* ======= Game state ======= */
+let qIndex = 0;
+let score = 0;
+let running = false;
+let selected = null;
+let timerInterval = null;
+const timePerQ = 15; // seconds
+
+/* ======= DOM ======= */
+const sentenceEl = document.getElementById('sentence');
+const optionsEl = document.getElementById('options');
+const timerEl = document.getElementById('timer');
+const feedbackEl = document.getElementById('feedback');
+const submitBtn = document.getElementById('submitBtn');
+const skipBtn = document.getElementById('skipBtn');
+const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const qIndexEl = document.getElementById('qIndex');
+const qTotalEl = document.getElementById('qTotal');
+const progressBar = document.getElementById('progressBar');
+const currentScoreEl = document.getElementById('currentScore');
+const bestScoreEl = document.getElementById('bestScore');
+const hallEl = document.getElementById('hall');
+const showHofBtn = document.getElementById('showHofBtn');
+const hofListEl = document.getElementById('hofList');
+const saveHofBtn = document.getElementById('saveHofBtn');
+const hofNameInput = document.getElementById('hofName');
+
+const certContainer = document.getElementById('certificateContainer');
+const certNameEl = document.getElementById('certName');
+const certScoreEl = document.getElementById('certScore');
+const certGivenDateEl = document.getElementById('certGivenDate');
+
+const BEST_KEY = 'grammarGuardianBest';
+const HOF_KEY = 'grammarGuardianHOF';
+const HOF_THRESHOLD = 6; // example: reach 6 to qualify
+
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]] } }
+function clearTimer(){ if(timerInterval) clearInterval(timerInterval); timerInterval = null; }
+function getBest(){ return parseInt(localStorage.getItem(BEST_KEY) || '0',10); }
+function setBest(v){ localStorage.setItem(BEST_KEY, String(v)); }
+
+function renderQuestion(){
+  if(qIndex >= questions.length){ endGame(); return; }
+  selected = null;
+  feedbackEl.textContent = '';
+  const q = questions[qIndex];
+  sentenceEl.textContent = q.sentence;
+  optionsEl.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'opt';
+    btn.tabIndex = 0;
+    btn.textContent = opt;
+    btn.addEventListener('click', ()=> selectOption(i, btn));
+    btn.addEventListener('keydown', (e)=> { if(e.key==='Enter' || e.key===' ') selectOption(i, btn) });
+    optionsEl.appendChild(btn);
+  });
+  qIndexEl.textContent = qIndex+1;
+  qTotalEl.textContent = questions.length;
+  updateProgress();
+  startTimer(timePerQ);
+}
+
+function selectOption(i, el){
+  document.querySelectorAll('.opt').forEach(x=>x.classList.remove('selected'));
+  el.classList.add('selected');
+  selected = i;
+  feedbackEl.textContent = '';
+}
+
+function startTimer(seconds){
+  clearTimer();
+  let remaining = seconds;
+  timerEl.textContent = `Time: ${remaining}s`;
+  timerInterval = setInterval(()=> {
+    remaining--;
+    if(remaining < 0){ clearTimer(); timerEl.textContent = 'Time: 0s'; autoSubmit(); return; }
+    timerEl.textContent = `Time: ${remaining}s`;
+  },1000);
+}
+
+function submitAnswer(){
+  if(!running) return;
+  const q = questions[qIndex];
+  if(selected === null){ feedbackEl.textContent = 'Please choose an option or Skip.'; return; }
+  clearTimer();
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach((el, idx)=>{
+    if(idx === q.answer) el.classList.add('correct');
+    if(idx === selected && idx !== q.answer) el.classList.add('wrong');
+  });
+  if(selected === q.answer){
+    score++;
+    feedbackEl.textContent = '✅ Correct! +' + 1;
+    feedbackEl.style.color = '#0b6';
+  } else {
+    feedbackEl.textContent = '❌ Incorrect. ' + q.explanation;
+    feedbackEl.style.color = '#b22222';
+  }
+  currentScoreEl.textContent = score;
+  const best = getBest();
+  if(score > best){ setBest(score); bestScoreEl.textContent = score; }
+  setTimeout(()=> {
+    qIndex++;
+    if(qIndex < questions.length) renderQuestion(); else endGame();
+  }, 1300);
+}
+
+function autoSubmit(){
+  feedbackEl.textContent = '⏰ Time up!';
+  feedbackEl.style.color = '#b22222';
+  const q = questions[qIndex];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach((el, idx)=> { if(idx === q.answer) el.classList.add('correct'); });
+  setTimeout(()=> { qIndex++; if(qIndex < questions.length) renderQuestion(); else endGame(); }, 1000);
+}
+
+function updateProgress(){
+  const pct = Math.round((qIndex / questions.length) * 100);
+  progressBar.style.width = pct + '%';
+}
+
+function startGame(){
+  shuffle(questions);
+  qIndex = 0; score = 0;
+  running = true;
+  currentScoreEl.textContent = score;
+  bestScoreEl.textContent = getBest();
+  feedbackEl.textContent = '';
+  certContainer.classList.add('hidden');
+  renderQuestion();
+}
+
+function endGame(){
+  running = false;
+  clearTimer();
+  feedbackEl.style.color = '#333';
+  feedbackEl.textContent = `Game over — your score: ${score}/${questions.length}.`;
+  if(score >= HOF_THRESHOLD){
+    alert('Great job! You qualify for the Hall of Fame. Enter your name and press Save in the Hall of Fame panel.');
+    hallEl.classList.remove('hidden');
+    populateHOF();
+  }
+  let name = (hofNameInput.value || 'Player').trim();
+  showCertificate(name, score, questions.length);
+}
+
+function loadHOF(){ try{ return JSON.parse(localStorage.getItem(HOF_KEY) || '[]') }catch(e){ return [] } }
+function saveHOF(list){ localStorage.setItem(HOF_KEY, JSON.stringify(list)); }
+
+function populateHOF(){
+  hofListEl.innerHTML = '<div style="padding:8px;color:#666">Loading...</div>';
+  const list = loadHOF().sort((a,b)=> b.score - a.score).slice(0,10);
+  hofListEl.innerHTML = '';
+  if(list.length === 0){
+    hofListEl.innerHTML = '<div style="padding:8px;color:#666">No entries yet</div>';
+    return;
+  }
+  list.forEach((it, idx) => {
+    const div = document.createElement('div');
+    div.className = 'hof-item';
+    div.innerHTML = `<div>${idx+1}. ${escapeHtml(it.name)}</div><div>${it.score}</div>`;
+    hofListEl.appendChild(div);
+  });
+}
+
+function saveMyHOFEntry(){
+  const name = (hofNameInput.value || 'Anonymous').trim();
+  if(!name){ alert('Enter a name first'); return; }
+  const list = loadHOF();
+  list.push({ name, score, date: Date.now() });
+  saveHOF(list);
+  populateHOF();
+  alert('Saved to Hall of Fame.');
+}
+
+function showCertificate(name, score, total){
+  certContainer.classList.remove('hidden');
+  certNameEl.textContent = name ? name.toUpperCase() : 'PLAYER';
+  certScoreEl.textContent = `Scored ${score} out of ${total} in Grammar Guardian.`;
+  certGivenDateEl.textContent = new Date().toLocaleDateString();
+  window.scrollTo({top: certContainer.offsetTop, behavior: 'smooth'});
+}
+
+function escapeHtml(str){ return String(str).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+submitBtn.addEventListener('click', ()=> submitAnswer());
+skipBtn.addEventListener('click', ()=> { clearTimer(); qIndex++; if(qIndex<questions.length) renderQuestion(); else endGame(); });
+startBtn.addEventListener('click', ()=> { hallEl.classList.add('hidden'); certContainer.classList.add('hidden'); startGame(); });
+resetBtn.addEventListener('click', ()=> { if(confirm('Reset best score and Hall of Fame?')){ localStorage.removeItem(BEST_KEY); localStorage.removeItem(HOF_KEY); bestScoreEl.textContent='0'; populateHOF(); alert('Reset done.'); }});
+showHofBtn.addEventListener('click', ()=> { hallEl.classList.toggle('hidden'); if(!hallEl.classList.contains('hidden')) populateHOF(); });
+saveHofBtn.addEventListener('click', saveMyHOFEntry);
+
+(function init(){
+  bestScoreEl.textContent = getBest();
+  qTotalEl.textContent = questions.length;
+  currentScoreEl.textContent = score;
+  optionsEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') submitAnswer(); });
+  window.addEventListener('load', populateHOF);
+})();
+</script>
+</body>
+</html>
