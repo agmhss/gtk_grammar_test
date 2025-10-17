@@ -161,7 +161,7 @@
         <div class="certificate-content" id="certContent">
           This certificate is proudly presented to <strong id="certName">[Recipient Name]</strong> <br>
           for his great interest in English Grammar.<br><br>
-          We honor your commitment, perseverance, and excellence.<br>
+          We honor your commitment, perseverance and excellence.<br>
           <span id="certScore"></span>
         </div>
         <div class="certificate-footer" id="certDate">
@@ -191,7 +191,7 @@ const questions = [
   { sentence: "I suggested him of study more.", options:["by","to","two","too"], answer:1, explanation:"Use 'to' before infinitive" },
   { sentence: "There is no any reason to worry.", options:["no any","any","not no any","no not any"], answer:0, explanation:"Correct: 'There is not any' or better 'There is no reason' but among options ' no any' fits the intended correction." },
   { sentence: "She is better than me at chess.", options:["me","I","my","mine"], answer:1, explanation:"Formally 'better than I (am)' is correct; 'me' is common but informal." },
-  { sentence: "We visited Paris last year, didn't we?", options:["did","didn't","do","does"], answer:1, explanation:"Negative question tag for positive statement is 'didn't we'." },
+  { sentence: "We visited Paris last year, don't we?", options:["did","didn't","do","does"], answer:1, explanation:"Negative question tag for positive statement is 'didn't we'." },
   { sentence: "Everyone must bring their pencil.", options:["his or her","their","its","theirs"], answer:0, explanation:"Formal singular 'everyone' takes 'his or her' (or use 'their' in modern usage)."},
   { sentence: "I am interesting in music.", options:["interested","interesting","interest","interests"], answer:0, explanation:"Use adjective 'interested' (feeling) not 'interesting' (causing interest)." },
   { sentence: "He is one of the best player in the team.", options:["player","players","playing","plays"], answer:1, explanation:"One of the + plural noun → 'players'." },
@@ -221,7 +221,7 @@ const questions = [
   { sentence: "You must finish it, ____ you?", options:["must","mustn’t","needn’t","will"], answer:1, explanation:"Tag question repeats the auxiliary in negative form." },
   { sentence: "The letter ____ by tomorrow.", options:["will send","is sent","will be sent","was sent"], answer:2, explanation:"Future passive: 'will be sent'." },
   { sentence: "If he ____ harder, he would pass.", options:["worked","works","working","work"], answer:0, explanation:"Second conditional uses past form after 'if'." },
-  { sentence: "I’d rather you ____ now.", options:["leave","left","leaving","leaves"], answer:1, explanation:"'I'd rather you' is followed by past simple." },
+  { sentence: "I’d rather like you ____ now.", options:["leave","left","leaving","leaves"], answer:1, explanation:"'I'd rather you' is followed by past simple." },
   { sentence: "He made me ____ the truth.", options:["tell","to tell","told","telling"], answer:0, explanation:"'Make' + object + base verb form." },
   { sentence: "The test was easier than I ____.", options:["expected","expect","was expecting","had expect"], answer:0, explanation:"Past simple fits context." },
   { sentence: "She speaks English ____ than I do.", options:["good","better","best","well"], answer:1, explanation:"Comparative form is 'better'." },
@@ -235,7 +235,7 @@ const questions = [
   { sentence: "If only I ____ more time!", options:["have","had","has","having"], answer:1, explanation:"'If only' uses past tense for unreal wish." },
   { sentence: "She told me she ____ tired.", options:["is","was","were","be"], answer:1, explanation:"Reported speech: change 'is' to 'was'." },
   { sentence: "They arrived ____ time to see the show.", options:["on","at","in","by"], answer:0, explanation:"'On time' means punctual." },
-  { sentence: "He hasn’t finished yet, ____?", options:["hasn’t","has","didn’t","does"], answer:1, explanation:"Tag question after negative uses positive 'has'." },
+  { sentence: "He hasn’t finished yet, ____ he ?", options:["hasn’t","has","didn’t","does"], answer:1, explanation:"Tag question after negative uses positive 'has'." },
   { sentence: "This book is ____ than that one.", options:["more interesting","interestinger","most interesting","interesting"], answer:0, explanation:"Correct comparative form is 'more interesting'." },
   { sentence: "We’ll go for a walk if it ____ raining.", options:["stops","stop","stopped","stopping"], answer:0, explanation:"Present simple after 'if' in first conditional." },
   { sentence: "There are ____ apples in the basket.", options:["a few","few","little","much"], answer:0, explanation:"'A few' is used with countable plural nouns." },
@@ -334,7 +334,7 @@ let score = 0;
 let running = false;
 let selected = null;
 let timerInterval = null;
-const timePerQ = 15; // seconds
+const timePerQ = 30; // seconds
 
 /* ======= DOM ======= */
 const sentenceEl = document.getElementById('sentence');
@@ -363,7 +363,7 @@ const certGivenDateEl = document.getElementById('certGivenDate');
 
 const BEST_KEY = 'grammarGuardianBest';
 const HOF_KEY = 'grammarGuardianHOF';
-const HOF_THRESHOLD = 6; // example: reach 6 to qualify
+const HOF_THRESHOLD = 10; // example: reach 10 to qualify
 
 function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]] } }
 function clearTimer(){ if(timerInterval) clearInterval(timerInterval); timerInterval = null; }
